@@ -1,16 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Serialization;
+﻿using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     // Variables
-    private CharacterController _controller;
     [SerializeField] private float speed = 5.0f;
     [SerializeField] private float gravity = 1.0f;
     [SerializeField] private float jumpHeight = 35.0f;
     [SerializeField] private int coins;
+    
+    private CharacterController _controller;
     private UIManager _uiManager;
     private float _yVelocity;
     private bool _canDoubleJump = false;
@@ -69,4 +67,6 @@ public class Player : MonoBehaviour
 
         _uiManager.UpDateCoinDisplay(coins);
     }
+    
+    // create method for PlayerMovement()
 }
