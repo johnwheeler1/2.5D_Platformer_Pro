@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 public class Player : MonoBehaviour
 {
@@ -6,17 +8,18 @@ public class Player : MonoBehaviour
     [SerializeField] private float speed = 5.0f;
     [SerializeField] private float gravity = 1.0f;
     [SerializeField] private float jumpHeight = 35.0f;
+    [SerializeField] private float jumpMultiplier = 2f;
     [SerializeField] private int coins;
+    [SerializeField] private int lives = 3;
     
+
     private CharacterController _controller;
     private UIManager _uiManager;
     private float _yVelocity;
-    private bool _canDoubleJump = false;
+    private bool _canDoubleJump;
 
 
-
-
-    void Start()
+    private void Start()
     {
         _controller = GetComponent<CharacterController>();
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
@@ -25,35 +28,37 @@ public class Player : MonoBehaviour
         {
             Debug.LogError("The UI Manager is NULL!");
         }
+
+        _uiManager.UpdateLivesDisplay(lives);
     }
 
-    
-    void Update()
+
+    private void Update()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
-        Vector3 direction = new Vector3(horizontalInput, 0, 0);
+        var horizontalInput = Input.GetAxis("Horizontal");
+        var direction = new Vector3(horizontalInput, 0, 0);
         Vector3 velocity = direction * speed;
 
-        if (_controller.isGrounded == true)
+        if (_controller.isGrounded != true)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if (_canDoubleJump)
+                {
+                    _yVelocity += jumpHeight * jumpMultiplier;
+                    _canDoubleJump = false;
+                }
+            }
+
+            _yVelocity -= gravity;
+        }
+        else
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 _yVelocity = jumpHeight;
                 _canDoubleJump = true;
             }
-        }
-        else
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if (_canDoubleJump == true)
-                {
-                    _yVelocity += jumpHeight * 2f;
-                    _canDoubleJump = false;
-                }
-            }
-            
-            _yVelocity -= gravity;
         }
 
         velocity.y = _yVelocity;
@@ -67,6 +72,14 @@ public class Player : MonoBehaviour
 
         _uiManager.UpDateCoinDisplay(coins);
     }
-    
-    // create method for PlayerMovement()
+
+    public void Damage()
+    {
+        lives--;
+
+        _uiManager.UpdateLivesDisplay(lives);
+
+        if (lives >= 1) return;
+        SceneManager.LoadScene(0);
+    }
 }
